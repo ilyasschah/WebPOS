@@ -1,0 +1,27 @@
+﻿@page
+@model WebPOS.Pages.Admin.BusinessProfileModel
+@{
+    ViewData["Title"] = "Business Profile";
+}
+
+<h2>Business Profile</h2>
+
+<form method="post" class="p-3 border rounded bg-light">
+    <div class="mb-3">
+        <label asp-for="BusinessInfo.Name" class="form-label">Business Name</label>
+        <input asp-for="BusinessInfo.Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BusinessInfo.TemplateId" class="form-label">Activity Type</label>
+        <select asp-for="BusinessInfo.TemplateId" class="form-select">
+            <option value="">-- Select Activity Type --</option>
+            @foreach (var template in Model.Templates)
+            {
+                <option value="@template.TemplateId">@template.TemplateName</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>

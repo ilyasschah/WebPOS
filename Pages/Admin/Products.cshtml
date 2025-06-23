@@ -1,0 +1,101 @@
+﻿@page
+@model WebPOS.Pages.Admin.ProductsModel
+@{
+    ViewData["Title"] = "Manage Products";
+}
+
+<h2>Product Management</h2>
+
+<!-- Add Product Form -->
+<form method="post" asp-page-handler="Add" class="mb-4">
+    <div class="row">
+        <div class="col">
+            <input asp-for="NewProduct.Name" class="form-control" placeholder="Product Name" />
+        </div>
+        <div class="col">
+            <input asp-for="NewProduct.Price" class="form-control" placeholder="Price" type="number" step="0.01" />
+        </div>
+        <div class="col">
+            <input asp-for="NewProduct.Stock" class="form-control" placeholder="Stock" type="number" />
+        </div>
+        <div class="col">
+            <select asp-for="NewProduct.CategoryId" class="form-control">
+                <option value="">-- Select Category --</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.CategoryId">@category.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-primary">Add Product</button>
+        </div>
+    </div>
+</form>
+
+<!-- Product Table -->
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model.Products)
+        {
+            <tr>
+                <td>@product.ProductId</td>
+                <td>@product.Name</td>
+                <td>@product.Price.ToString("C")</td>
+                <td>@product.Stock</td>
+                <td>@product.Category?.Name</td>
+                <td>
+                    <a asp-page="/Admin/Products" asp-route-EditId="@product.ProductId" class="btn btn-sm btn-warning me-2">Edit</a>
+                    <form method="post" asp-page-handler="Delete" style="display:inline;">
+                        <input type="hidden" name="id" value="@product.ProductId" />
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Edit Product Form -->
+@if (Model.EditId.HasValue)
+{
+    <h4>Edit Product</h4>
+    <form method="post" asp-page-handler="Edit" class="mb-4">
+        <input type="hidden" asp-for="EditProduct.ProductId" />
+        <div class="row">
+            <div class="col">
+                <input asp-for="EditProduct.Name" class="form-control" placeholder="Product Name" />
+            </div>
+            <div class="col">
+                <input asp-for="EditProduct.Price" class="form-control" placeholder="Price" type="number" step="0.01" />
+            </div>
+            <div class="col">
+                <input asp-for="EditProduct.Stock" class="form-control" placeholder="Stock" type="number" />
+            </div>
+            <div class="col">
+                <select asp-for="EditProduct.CategoryId" class="form-control">
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <option value="@cat.CategoryId" selected="@(cat.CategoryId == Model.EditProduct.CategoryId)">
+                            @cat.Name
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-success">Save</button>
+                <a asp-page="/Admin/Products" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </form>
+}

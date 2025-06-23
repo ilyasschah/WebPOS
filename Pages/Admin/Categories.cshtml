@@ -1,0 +1,39 @@
+﻿@page
+@model WebPOS.Pages.Admin.CategoriesModel
+@{
+    ViewData["Title"] = "Manage Categories";
+}
+
+<h2>Category Management</h2>
+
+<form method="post" asp-page-handler="Add" class="mb-4">
+    <div class="input-group">
+        <input asp-for="NewCategory.Name" class="form-control" placeholder="New Category Name" />
+        <button class="btn btn-primary" type="submit">Add Category</button>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Category Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in Model.Categories)
+        {
+            <tr>
+                <td>@category.CategoryId</td>
+                <td>@category.Name</td>
+                <td>
+                    <form method="post" asp-page-handler="Delete">
+                        <input type="hidden" name="id" value="@category.CategoryId" />
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
