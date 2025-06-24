@@ -45,6 +45,7 @@ namespace WebPOS.Pages.POS
                     (categoryId == null || p.CategoryId == categoryId))
                 .OrderBy(p => p.Name)
                 .ToListAsync();
+            Cart = GetCart();
         }
         private const string CartSessionKey = "POS_Cart";
 
@@ -90,6 +91,64 @@ namespace WebPOS.Pages.POS
             SaveCart(cart);
 
             // Redirect to same page with filter
+            if (categoryId != null)
+                return RedirectToPage(new { categoryId });
+            return RedirectToPage();
+        }
+        public IActionResult OnPostIncreaseQuantity(int productId, int? categoryId = null)
+        {
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(i => i.ProductId == productId);
+            if (item != null)
+            {
+                item.Quantity++;
+                SaveCart(cart);
+            }
+            if (categoryId != null)
+                return RedirectToPage(new { categoryId });
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostDecreaseQuantity(int productId, int? categoryId = null)
+        {
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(i => i.ProductId == productId);
+            if (item != null)
+            {
+                item.Quantity--;
+                if (item.Quantity <= 0)
+                    cart.Remove(item);
+                SaveCart(cart);
+            }
+            if (categoryId != null)
+                return RedirectToPage(new { categoryId });
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostRemoveFromCart(int productId, int? categoryId = null)
+        {
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(i => i.ProductId == productId);
+            if (item != null)
+            {
+                cart.Remove(item);
+                SaveCart(cart);
+            }
+            if (categoryId != null)
+                return RedirectToPage(new { categoryId });
+            return RedirectToPage();
+        }
+        public IActionResult OnPostClearCart(int? categoryId = null)
+        {
+            SaveCart(new List<CartItem>());
+            if (categoryId != null)
+                return RedirectToPage(new { categoryId });
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostPay(int? categoryId = null)
+        {
+            SaveCart(new List<CartItem>());
             if (categoryId != null)
                 return RedirectToPage(new { categoryId });
             return RedirectToPage();
