@@ -1,0 +1,22 @@
+﻿@page
+@model WebPOS.Pages.POS.IndexModel
+@{
+    var name = Model.BusinessType;
+}
+
+<h1>POS Cashier Interface</h1>
+
+@if (name == "default" || name == "café" || name == "restaurant")
+{
+    <partial name="_POSFood" model="Model.Business" />
+}
+else if (name == "barber" || name == "beauty shop" || name == "service general")
+{
+    <partial name="_POSService" model="Model.Business" />
+}
+else
+{
+    <div>
+        <strong>No supported business type found.</strong>
+    </div>
+}

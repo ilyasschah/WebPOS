@@ -7,16 +7,23 @@ namespace WebPOS.Models
     public class User
     {
         [Key]
-        [Column("id")]
-        public int Id { get; set; }
+        [Column("userid")]
+        public int UserId { get; set; }
 
+        [Required]
         [Column("username")]
+        [StringLength(100)]
         public string Username { get; set; } = "";
 
-        [Column("password")]
-        public string Password { get; set; } = "";
+        [Required]
+        [Column("passwordhash")]
+        [StringLength(255)]
+        public string PasswordHash { get; set; } = "";
 
-        [Column("role")]
-        public string Role { get; set; } = "";
+        [Column("roleid")]
+        public int RoleId { get; set; }
+
+        [Column("businessid")]
+        public int BusinessId { get; set; }
     }
 }

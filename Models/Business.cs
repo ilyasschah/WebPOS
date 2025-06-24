@@ -9,8 +9,10 @@ namespace WebPOS.Models
         [Key]
         [Column("businessid")]
         public int BusinessId { get; set; }
-
+        
+        [Required]
         [Column("name")]
+        [StringLength(128)]
         public string Name { get; set; } = "";
 
         [Column("templateid")]
@@ -18,5 +20,7 @@ namespace WebPOS.Models
 
         [ForeignKey("TemplateId")]
         public Template? Template { get; set; }
+        public ICollection<Category>? Categories { get; set; }
+        public ICollection<Product>? Products { get; set; }
     }
 }

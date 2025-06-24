@@ -1,0 +1,43 @@
+﻿@page
+@model WebPOS.Pages.Setup.BusinessSetupModel
+@{
+    ViewData["Title"] = "Initial Business Setup";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] – WebPOS</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center h-screen">
+    <form asp-page="BusinessSetup" method="post"
+          class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md space-y-6">
+
+        <h1 class="text-2xl font-semibold text-center">Welcome to WebPOS</h1>
+
+        <div>
+            <label asp-for="Input.Name" class="block mb-1">Business name</label>
+            <input asp-for="Input.Name" class="w-full p-2 rounded-lg text-black" />
+            <span asp-validation-for="Input.Name" class="text-red-400 text-sm" />
+        </div>
+
+        <div>
+            <label asp-for="Input.TemplateId" class="block mb-1">Activity type</label>
+            <select asp-for="Input.TemplateId" asp-items="Model.TemplateOptions"
+                    class="w-full p-2 rounded-lg text-black"></select>
+            <span asp-validation-for="Input.TemplateId" class="text-red-400 text-sm" />
+        </div>
+
+        <button type="submit"
+                class="w-full py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 transition">
+            Save &amp; Continue
+        </button>
+    </form>
+
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

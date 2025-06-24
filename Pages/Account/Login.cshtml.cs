@@ -1,40 +1,63 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using WebPOS.Data;
 using WebPOS.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebPOS.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        [BindProperty]
-        public string Username { get; set; }
+        private readonly AppDbContext _ctx;
+        private readonly ILogger<LoginModel> _logger;
+
+        public LoginModel(AppDbContext ctx, ILogger<LoginModel> logger)
+        {
+            _ctx = ctx;
+            _logger = logger;
+        }
 
         [BindProperty]
-        public string Password { get; set; }
+        public InputModel Input { get; set; } = new();
 
         public string? ErrorMessage { get; set; }
 
+        public void OnGet()
+        {
+            // Optionally: clear session/cookie here for full logout
+        }
+
         public IActionResult OnPost()
         {
-            // TODO: Replace with database user check
-            var fakeUsers = new List<User>
-            {
-                new User { Id = 1, Username = "admin", Password = "1234", Role = "Admin" },
-                new User { Id = 2, Username = "cashier", Password = "1234", Role = "Cashier" }
-            };
+            if (!ModelState.IsValid)
+                return Page();
 
-            var user = fakeUsers.FirstOrDefault(u => u.Username == Username && u.Password == Password);
+            var user = _ctx.Users.FirstOrDefault(u =>
+                u.Username == Input.Username && u.PasswordHash == Input.Password);
 
             if (user == null)
             {
-                ErrorMessage = "Invalid credentials.";
+                ErrorMessage = "Invalid username or password.";
                 return Page();
             }
 
+            // Simple session authentication
+            HttpContext.Session.SetInt32("UserId", user.UserId);
             HttpContext.Session.SetString("Username", user.Username);
-            HttpContext.Session.SetString("Role", user.Role);
+            HttpContext.Session.SetInt32("BusinessId", user.BusinessId);
 
-            return RedirectToPage(user.Role == "Admin" ? "/Admin/Index" : "/Cashier/Index");
+            // Redirect to home page after login
+            return RedirectToPage("/Index");
+        }
+
+        public class InputModel
+        {
+            [Required]
+            public string Username { get; set; } = "";
+
+            [Required]
+            [DataType(DataType.Password)]
+            public string Password { get; set; } = "";
         }
     }
 }

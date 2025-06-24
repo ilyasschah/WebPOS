@@ -12,7 +12,7 @@ namespace WebPOS.Models
 
         [Column("templatename")]
         public string TemplateName { get; set; } = "";
-
+        //public string? Description { get; set; }
         public ICollection<Business>? Businesses { get; set; }
     }
 }
