@@ -6,16 +6,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebPOS.Pages.Account
 {
-    public class LoginModel : PageModel
+    public class LoginModel(AppDbContext ctx, ILogger<LoginModel> logger) : PageModel
     {
-        private readonly AppDbContext _ctx;
-        private readonly ILogger<LoginModel> _logger;
-
-        public LoginModel(AppDbContext ctx, ILogger<LoginModel> logger)
-        {
-            _ctx = ctx;
-            _logger = logger;
-        }
+        private readonly AppDbContext _ctx = ctx;
+        private readonly ILogger<LoginModel> _logger = logger;
 
         [BindProperty]
         public InputModel Input { get; set; } = new();

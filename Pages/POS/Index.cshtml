@@ -8,6 +8,10 @@
 
 @if (name == "default")
 {
+    ViewData["Categories"] = Model.Categories;
+    ViewData["Products"] = Model.Products;
+    ViewData["SelectedCategoryId"] = Model.SelectedCategoryId;
+    ViewData["Cart"] = Model.Cart;
     <partial name="_POSDefault" model="Model.Business" />
 }
 else if (name == "café" || name == "restaurant")
