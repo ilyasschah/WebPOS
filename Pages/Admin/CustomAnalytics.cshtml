@@ -1,0 +1,77 @@
+﻿@page  
+@model WebPOS.Pages.Admin.CustomAnalyticsModel  
+@{  
+    ViewData["Title"] = "Business Analytics";  
+    Layout = "_Layout";  
+    var salesDays = Model.SalesByDay.Select(x => x.Day.ToString("yyyy-MM-dd")).ToArray();  
+    var salesTotals = Model.SalesByDay.Select(x => x.Total).ToArray();  
+}  
+
+<div class="container py-5">  
+    <h2 class="mb-4 text-center">Business Analytics & KPIs</h2>  
+    <div class="row text-center mb-5">  
+        <div class="col-md-3 mb-4">  
+            <div class="card shadow border-0">  
+                <div class="card-body">  
+                    <h4 class="card-title mb-1">Total Sales</h4>  
+                    <div class="display-5 fw-bold">@Model.TotalSalesCount</div>  
+                </div>  
+            </div>  
+        </div>  
+        <div class="col-md-3 mb-4">  
+            <div class="card shadow border-0">  
+                <div class="card-body">  
+                    <h4 class="card-title mb-1">Sales Amount</h4>  
+                    <div class="display-5 fw-bold">@Model.TotalSalesAmount.ToString("C")</div>  
+                </div>  
+            </div>  
+        </div>  
+        <div class="col-md-3 mb-4">  
+            <div class="card shadow border-0">  
+                <div class="card-body">  
+                    <h4 class="card-title mb-1">Products</h4>  
+                    <div class="display-5 fw-bold">@Model.TotalProducts</div>  
+                </div>  
+            </div>  
+        </div>  
+        <div class="col-md-3 mb-4">  
+            <div class="card shadow border-0">  
+                <div class="card-body">  
+                    <h4 class="card-title mb-1 text-danger">Low Stock</h4>  
+                    <div class="display-5 fw-bold text-danger">@Model.LowStockProducts</div>  
+                </div>  
+            </div>  
+        </div>  
+    </div>  
+    <div class="card shadow border-0 mb-4">  
+        <div class="card-body">  
+            <h5 class="mb-3">Sales (Last 30 Days)</h5>  
+            <canvas id="salesChart" style="min-height:300px"></canvas>  
+        </div>  
+    </div>  
+</div>  
+
+<!-- Chart.js CDN -->  
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  
+<script>  
+    const ctx = document.getElementById('salesChart').getContext('2d');  
+    const chart = new Chart(ctx, {  
+        type: 'bar',  
+        data: {  
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(salesDays)),  
+            datasets: [{  
+                label: 'Sales',  
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(salesTotals)),  
+                backgroundColor: 'rgba(0, 123, 255, 0.5)',  
+                borderColor: 'rgba(0, 123, 255, 1)',  
+                borderWidth: 2  
+            }]  
+        },  
+        options: {  
+            scales: {  
+                x: { title: { display: true, text: 'Date' } },  
+                y: { title: { display: true, text: 'Amount' }, beginAtZero: true }  
+            }  
+        }  
+    });  
+</script>

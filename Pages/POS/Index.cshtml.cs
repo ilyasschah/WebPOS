@@ -189,6 +189,16 @@ namespace WebPOS.Pages.POS
             }
             await _ctx.SaveChangesAsync();
 
+            foreach (var item in cart) // Moved this block to ensure it is reachable
+            {
+                var product = await _ctx.Products.FindAsync(item.ProductId);
+                if (product != null)
+                {
+                    product.Stock -= item.Quantity; // This allows negative stock (as requested)
+                }
+            }
+            await _ctx.SaveChangesAsync();
+
             SaveCart(new List<CartItem>()); // clear cart
 
             // Redirect or show receipt as needed

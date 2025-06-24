@@ -49,7 +49,7 @@ namespace WebPOS.Pages.Admin
         public async Task<IActionResult> OnPostAddAsync()
         {
             if (!ModelState.IsValid) return Page();
-
+            //product.Stock = product.Stock;
             NewProduct.BusinessId = _businessHelper.GetBusinessId();
             _context.Products.Add(NewProduct);
             await _context.SaveChangesAsync();
