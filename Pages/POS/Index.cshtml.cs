@@ -146,9 +146,49 @@ namespace WebPOS.Pages.POS
             return RedirectToPage();
         }
 
-        public IActionResult OnPostPay(int? categoryId = null)
+        public async Task<IActionResult> OnPostPayAsync(int? categoryId = null)
         {
-            SaveCart(new List<CartItem>());
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+                return RedirectToPage("/Account/Login");
+
+            var cart = GetCart();
+            if (cart == null || !cart.Any())
+                return RedirectToPage();
+
+            decimal total = cart.Sum(i => i.Subtotal);
+
+            // 1. Create a new sale
+            var sale = new Sale
+            {
+                SaleDate = DateTime.UtcNow,
+                TotalAmount = total,
+                UserId = userId.Value,
+                // Fill these as needed (for now, zero or null)
+                CustomerId = null,    // or assign a real customer if you have one
+                PaymentType = 1         // 1 = cash? You can improve this later.
+            };
+
+            _ctx.Sales.Add(sale);
+            await _ctx.SaveChangesAsync(); // Sale.Id will now be filled
+
+            // 2. Create sale items
+            foreach (var item in cart)
+            {
+                var saleItem = new SaleItem
+                {
+                    SaleId = sale.Id,
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    PriceAtSale = item.Price
+                };
+                _ctx.SaleItems.Add(saleItem);
+            }
+            await _ctx.SaveChangesAsync();
+
+            SaveCart(new List<CartItem>()); // clear cart
+
+            // Redirect or show receipt as needed
             if (categoryId != null)
                 return RedirectToPage(new { categoryId });
             return RedirectToPage();
