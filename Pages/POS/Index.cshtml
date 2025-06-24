@@ -6,7 +6,11 @@
 
 <h1>POS Cashier Interface</h1>
 
-@if (name == "default" || name == "café" || name == "restaurant")
+@if (name == "default")
+{
+    <partial name="_POSDefault" model="Model.Business" />
+}
+else if (name == "café" || name == "restaurant")
 {
     <partial name="_POSFood" model="Model.Business" />
 }
