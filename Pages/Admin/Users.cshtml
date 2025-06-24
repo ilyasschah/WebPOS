@@ -1,0 +1,56 @@
+﻿@page
+@model WebPOS.Pages.Admin.UsersModel
+@{
+    ViewData["Title"] = "User Management";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">User Management</h2>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Change Role</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@user.Role?.Name</td>
+                    <td>
+                        <form asp-page-handler="AssignRole" method="post" class="d-flex">
+                            <input type="hidden" name="userId" value="@user.UserId" />
+                            <select name="roleId" class="form-select me-2">
+                                    @foreach (var role in Model.Roles)
+                                    {
+                                        if (role.RoleId == user.RoleId)
+                                        {
+                                            <option value="@role.RoleId" selected>@role.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@role.RoleId">@role.Name</option>
+                                        }
+                                    }
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form asp-page-handler="RemoveUser" method="post">
+                            <input type="hidden" name="userId" value="@user.UserId" />
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

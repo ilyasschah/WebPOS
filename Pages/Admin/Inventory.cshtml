@@ -45,7 +45,10 @@
                     <th>Product</th>
                     <th>Category</th>
                     <th>Stock</th>
-                    <th>Update</th>
+                    @if (Model.CanUpdateStock)
+                    {
+                        <th>Update</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -54,14 +57,18 @@
                 <tr>
                     <td>@prod.Name</td>
                     <td>@prod.Category?.Name</td>
-                    <td>
-                        <form asp-page-handler="UpdateStock" method="post" class="d-flex align-items-center">
-                            <input type="hidden" name="productId" value="@prod.ProductId" />
-                            <input type="number" name="stock" value="@prod.Stock" class="form-control w-auto me-2" style="width: 80px;" />
-                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                        </form>
-                    </td>
                     <td>@prod.Stock</td>
+                    @if (Model.CanUpdateStock)
+                    {
+                        <td>
+                            <form asp-page-handler="UpdateStock" method="post" class="d-flex align-items-center">
+                                <input type="hidden" name="productId" value="@prod.ProductId" />
+                                <input type="number" name="stock" value="@prod.Stock" class="form-control w-auto me-2" style="width: 80px;" />
+                                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            </form>
+                        </td>
+                    }
+                    
                 </tr>
             }
             </tbody>

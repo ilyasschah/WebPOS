@@ -16,6 +16,9 @@ namespace WebPOS.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Business> Businesses { get; set; }
         public DbSet<Template> Templates { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+
     }
 }
 

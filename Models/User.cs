@@ -22,6 +22,8 @@ namespace WebPOS.Models
 
         [Column("roleid")]
         public int RoleId { get; set; }
+        [ForeignKey("RoleId")]
+        public Role? Role { get; set; }
 
         [Column("businessid")]
         public int BusinessId { get; set; }

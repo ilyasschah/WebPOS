@@ -1,0 +1,73 @@
+﻿@page
+@model WebPOS.Pages.Admin.RolePermissionsModel
+@{
+    ViewData["Title"] = "Role Permissions";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">Role Permissions Management</h2>
+    <form method="get" class="mb-4">
+        <label for="SelectedRoleId" class="form-label">Select Role:</label>
+        <select id="SelectedRoleId" name="SelectedRoleId" class="form-select w-auto d-inline" onchange="this.form.submit()">
+            <option value="">Choose...</option>
+            @foreach (var role in Model.Roles)
+            {
+                if (role.RoleId == Model.SelectedRoleId)
+                {
+                    <option value="@role.RoleId" selected>@role.Name</option>
+                }
+                else
+                {
+                    <option value="@role.RoleId">@role.Name</option>
+                }
+            }
+        </select>
+    </form>
+
+    @if (Model.SelectedRoleId != null)
+    {
+        var currentPerms = Model.RolePerms.ContainsKey(Model.SelectedRoleId.Value)
+            ? Model.RolePerms[Model.SelectedRoleId.Value]
+            : new List<string>();
+        <div class="mb-3">
+            <h5>Assigned Permissions:</h5>
+            @if (currentPerms.Any())
+            {
+                <ul>
+                @foreach (var perm in currentPerms)
+                {
+                    <li>
+                        @perm
+                        <form method="post" asp-page-handler="RemovePerm" class="d-inline ms-2">
+                            <input type="hidden" name="roleId" value="@Model.SelectedRoleId" />
+                            <input type="hidden" name="permission" value="@perm" />
+                            <button class="btn btn-link text-danger p-0" type="submit">Remove</button>
+                        </form>
+                    </li>
+                }
+                </ul>
+            }
+            else
+            {
+                <span class="text-muted">No permissions assigned.</span>
+            }
+        </div>
+        <div>
+            <h5>Add Permission:</h5>
+            <form method="post" asp-page-handler="AddPerm" class="d-flex align-items-center gap-2">
+                <input type="hidden" name="roleId" value="@Model.SelectedRoleId" />
+                <select name="permission" class="form-select w-auto">
+                    @foreach (var perm in Model.AllPermissions)
+                    {
+                        if (!currentPerms.Contains(perm))
+                        {
+                            <option value="@perm">@perm</option>
+                        }
+                    }
+                </select>
+                <button class="btn btn-primary">Add</button>
+            </form>
+        </div>
+    }
+</div>

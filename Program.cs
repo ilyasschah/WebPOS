@@ -9,7 +9,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<WebPOS.Services.BusinessHelper>();
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<WebPOS.Services.PermissionHelper>();
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddSession(options =>
