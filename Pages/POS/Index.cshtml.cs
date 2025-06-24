@@ -157,10 +157,13 @@ namespace WebPOS.Pages.POS
                 return RedirectToPage();
 
             decimal total = cart.Sum(i => i.Subtotal);
-
+            int? businessId = HttpContext.Session.GetInt32("BusinessId");
+            if (businessId == null)
+                return RedirectToPage("/Account/Login");
             // 1. Create a new sale
             var sale = new Sale
             {
+                BusinessId = businessId.Value,
                 SaleDate = DateTime.UtcNow,
                 TotalAmount = total,
                 UserId = userId.Value,
@@ -177,7 +180,7 @@ namespace WebPOS.Pages.POS
             {
                 var saleItem = new SaleItem
                 {
-                    SaleId = sale.Id,
+                    SaleId = sale.SaleId,
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
                     PriceAtSale = item.Price

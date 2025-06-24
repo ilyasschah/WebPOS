@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebPOS.Models
 {
-    [Table("sale_items")]
+    [Table("saleitems")] 
     public class SaleItem
     {
         [Key]

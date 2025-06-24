@@ -8,8 +8,8 @@ namespace WebPOS.Models
     public class Sale
     {
         [Key]
-        [Column("id")]
-        public int Id { get; set; }
+        [Column("saleid")]
+        public int SaleId { get; set; }
 
         [Column("userid")]
         public int UserId { get; set; }
