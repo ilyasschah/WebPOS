@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WebPOS.Data;
+using WebPOS.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // PostgreSQL connection string
@@ -64,7 +65,16 @@ app.Use(async (context, next) =>
                 return;
             }
         }
-
+        // Check if "Default" customer exists
+        if (!db.Customers.Any(c => c.Name == "Default"))
+        {
+            db.Customers.Add(new Customer
+            {
+                Name = "Default"
+                // Add any required fields with default values
+            });
+            db.SaveChanges();
+        }
         // Require login on all protected pages
         bool authenticated = context.Session.GetInt32("UserId") != null;
         if (!isStatic && !isBusinessSetup && !isAdminSetup && !isLoginPage)

@@ -58,12 +58,9 @@
             <form method="post" asp-page-handler="AddPerm" class="d-flex align-items-center gap-2">
                 <input type="hidden" name="roleId" value="@Model.SelectedRoleId" />
                 <select name="permission" class="form-select w-auto">
-                    @foreach (var perm in Model.AllPermissions)
+                    @foreach (var perm in Model.AvailablePermissions)
                     {
-                        if (!currentPerms.Contains(perm))
-                        {
-                            <option value="@perm">@perm</option>
-                        }
+                        <option value="@perm">@perm</option>
                     }
                 </select>
                 <button class="btn btn-primary">Add</button>
