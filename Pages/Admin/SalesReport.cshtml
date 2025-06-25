@@ -27,7 +27,7 @@
                 <tr>
                     <th>Date</th>
                     <th>Sale ID</th>
-                    <th>User</th>
+                    <th>Seler</th>
                     <th>Customer</th>
                     <th>Total</th>
                 </tr>
@@ -39,7 +39,7 @@
                         <td>@sale.SaleDate.ToString("yyyy-MM-dd HH:mm")</td>
                         <td>@sale.SaleId</td>
                         <td>@sale.UserId</td>
-                        <td>@sale.CustomerId?.ToString() ?? "-"</td>
+                        <td>@(sale.Customer != null ? sale.Customer.Name : "Default")</td>
                         <td>@sale.TotalAmount.ToString("C")</td>
                     </tr>
                 }

@@ -30,6 +30,7 @@ namespace WebPOS.Pages.Admin
                 salesQuery = salesQuery.Where(s => s.SaleDate < To.Value.AddDays(1));
 
             Sales = await salesQuery
+                .Include(s => s.Customer)
                 .OrderByDescending(s => s.SaleDate)
                 .ToListAsync();
 

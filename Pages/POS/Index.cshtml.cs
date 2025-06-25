@@ -161,15 +161,16 @@ namespace WebPOS.Pages.POS
             if (businessId == null)
                 return RedirectToPage("/Account/Login");
             // 1. Create a new sale
+            var defaultCustomer = _ctx.Customers.FirstOrDefault(c => c.Name == "Default");
+
             var sale = new Sale
             {
                 BusinessId = businessId.Value,
                 SaleDate = DateTime.UtcNow,
                 TotalAmount = total,
                 UserId = userId.Value,
-                // Fill these as needed (for now, zero or null)
-                CustomerId = null,    // or assign a real customer if you have one
-                PaymentType = 1         // 1 = cash? You can improve this later.
+                CustomerId = defaultCustomer != null ? defaultCustomer.Id : (int?)null,  // Use default customer if no real customer
+                PaymentType = 1
             };
 
             _ctx.Sales.Add(sale);

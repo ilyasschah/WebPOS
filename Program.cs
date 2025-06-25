@@ -66,15 +66,15 @@ app.Use(async (context, next) =>
             }
         }
         // Check if "Default" customer exists
-        if (!db.Customers.Any(c => c.Name == "Default"))
-        {
-            db.Customers.Add(new Customer
-            {
-                Name = "Default"
-                // Add any required fields with default values
-            });
-            db.SaveChanges();
-        }
+        //if (!db.Customers.Any(c => c.Name == "Default"))
+        //{
+        //    db.Customers.Add(new Customer
+        //    {
+        //        Name = "Default"
+        //        // Add any required fields with default values
+        //    });
+        //    db.SaveChanges();
+        //}
         // Require login on all protected pages
         bool authenticated = context.Session.GetInt32("UserId") != null;
         if (!isStatic && !isBusinessSetup && !isAdminSetup && !isLoginPage)

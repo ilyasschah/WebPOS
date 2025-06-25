@@ -26,6 +26,9 @@ namespace WebPOS.Models
         [Column("customer_id")]
         public int? CustomerId { get; set; }
 
+        [Column("Name")]
+        public int? Customer { get; set; }
+
         [Column("payment_type")]
         public int PaymentType { get; set; }
     }
