@@ -16,6 +16,8 @@ namespace WebPOS.Pages.POS
         public List<Category> Categories { get; set; } = new List<Category>();
         public List<Product> Products { get; set; } = new List<Product>();
         public int? SelectedCategoryId { get; set; }
+        public List<Table> Tables { get; set; }
+        public List<Order> Orders { get; set; }
         public List<CartItem> Cart { get; set; } = new();
         public async Task OnGetAsync(int? categoryId = null)
         {

@@ -31,6 +31,7 @@ namespace WebPOS.Pages.Admin
 
             Sales = await salesQuery
                 .Include(s => s.Customer)
+                .Include(s => s.User)
                 .OrderByDescending(s => s.SaleDate)
                 .ToListAsync();
 
