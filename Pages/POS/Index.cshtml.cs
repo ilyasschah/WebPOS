@@ -160,23 +160,48 @@ namespace WebPOS.Pages.POS
             int? businessId = HttpContext.Session.GetInt32("BusinessId");
             if (businessId == null)
                 return RedirectToPage("/Account/Login");
-            // 1. Create a new sale
-            var defaultCustomer = _ctx.Customers.FirstOrDefault(c => c.Name == "Default");
 
+            // 1. Daily order number logic
+            var today = DateTime.UtcNow.Date;
+            int maxOrderNumberToday = await _ctx.Orders
+                .Where(o => o.CreatedAt.Date == today)
+                .Select(o => o.OrderNumber)
+                .DefaultIfEmpty(0)
+                .MaxAsync();
+            int newOrderNumber = maxOrderNumberToday + 1;
+
+            // 2. Handle default customer
+            var defaultCustomer = await _ctx.Customers.FirstOrDefaultAsync(c => c.Name == "Default");
+
+            // 3. Create the Order and save it
+            var order = new Order
+            {
+                CreatedAt = DateTime.UtcNow,
+                OrderNumber = newOrderNumber,
+                BusinessId = businessId.Value,
+                CustomerId = defaultCustomer != null ? defaultCustomer.Id : (int?)null
+                // TODO: set TableId if using tables (add it here)
+            };
+            _ctx.Orders.Add(order);
+            await _ctx.SaveChangesAsync();
+
+            // 4. Create the Sale linked to the Order
             var sale = new Sale
             {
                 BusinessId = businessId.Value,
                 SaleDate = DateTime.UtcNow,
                 TotalAmount = total,
                 UserId = userId.Value,
-                CustomerId = defaultCustomer != null ? defaultCustomer.Id : (int?)null,  // Use default customer if no real customer
+                OrderId = order.OrderId,      // Use the new Order you just saved
+                TableId = order.TableId,      // Use if you have TableId, otherwise keep as null
+                CustomerId = order.CustomerId,
                 PaymentType = 1
             };
 
             _ctx.Sales.Add(sale);
-            await _ctx.SaveChangesAsync(); // Sale.Id will now be filled
+            await _ctx.SaveChangesAsync();
 
-            // 2. Create sale items
+            // 5. Create sale items
             foreach (var item in cart)
             {
                 var saleItem = new SaleItem
@@ -190,19 +215,19 @@ namespace WebPOS.Pages.POS
             }
             await _ctx.SaveChangesAsync();
 
-            foreach (var item in cart) // Moved this block to ensure it is reachable
+            // 6. Update product stock
+            foreach (var item in cart)
             {
                 var product = await _ctx.Products.FindAsync(item.ProductId);
                 if (product != null)
                 {
-                    product.Stock -= item.Quantity; // This allows negative stock (as requested)
+                    product.Stock -= item.Quantity;
                 }
             }
             await _ctx.SaveChangesAsync();
 
             SaveCart(new List<CartItem>()); // clear cart
 
-            // Redirect or show receipt as needed
             if (categoryId != null)
                 return RedirectToPage(new { categoryId });
             return RedirectToPage();
