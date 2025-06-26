@@ -20,7 +20,11 @@ namespace WebPOS.Models
 
         [ForeignKey("TemplateId")]
         public Template? Template { get; set; }
+
+        [NotMapped]
         public ICollection<Category>? Categories { get; set; }
+
+        [NotMapped]
         public ICollection<Product>? Products { get; set; }
     }
 }

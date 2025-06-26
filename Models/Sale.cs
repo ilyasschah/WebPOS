@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebPOS.Models
@@ -7,7 +6,6 @@ namespace WebPOS.Models
     [Table("sales")]
     public class Sale
     {
-        [Key]
         [Column("saleid")]
         public int SaleId { get; set; }
 
@@ -17,7 +15,6 @@ namespace WebPOS.Models
 
         [Column("businessid")]
         public int BusinessId { get; set; }
-        public Business Business { get; set; }
 
         [Column("saledate")]
         public DateTime SaleDate { get; set; }
@@ -31,10 +28,12 @@ namespace WebPOS.Models
 
         [Column("payment_type")]
         public int PaymentType { get; set; }
-        [Column("order_id")]
+
+        [Column("orderid")]
         public int? OrderId { get; set; }
         public Order Order { get; set; }
-        [Column("table_id")]
+
+        [Column("tableid")]
         public int? TableId { get; set; }
         public Table Table { get; set; }
     }

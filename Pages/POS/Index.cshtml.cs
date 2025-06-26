@@ -34,6 +34,12 @@ namespace WebPOS.Pages.POS
                 .FirstOrDefaultAsync(b => b.BusinessId == businessId);
 
             BusinessType = Business?.Template?.TemplateName?.ToLower() ?? string.Empty;
+            Tables = _ctx.Tables.Where(t => t.BusinessId == Business.BusinessId).ToList();
+            Orders = _ctx.Orders
+                .Include(o => o.Table)
+                .Include(o => o.OrderItems)
+                .Where(o => o.BusinessId == Business.BusinessId && o.Status != "completed")
+                .ToList();
 
             Categories = await _ctx.Categories
                 .Where(c => c.BusinessId == businessId)

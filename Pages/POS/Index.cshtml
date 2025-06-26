@@ -1,9 +1,17 @@
 ﻿@page
 @model WebPOS.Pages.POS.IndexModel
+@using WebPOS.Models
 @{
     var name = Model.BusinessType;
+    var foodModel = new POSFoodViewModel
+    {
+        Tables = Model.Tables,
+        Orders = Model.Orders,
+        Categories = Model.Categories,
+        Products = Model.Products,
+        Business = Model.Business
+    };
 }
-
 <h1>POS Cashier Interface</h1>
 
 @if (name == "default")
@@ -16,7 +24,7 @@
 }
 else if (name == "café" || name == "restaurant")
 {
-    <partial name="_POSFood" model="Model.Business" />
+    <partial name="_POSFood" model="foodModel" />
 }
 else if (name == "barber" || name == "beauty shop" || name == "service general")
 {

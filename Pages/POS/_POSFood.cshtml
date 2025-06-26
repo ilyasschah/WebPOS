@@ -1,69 +1,66 @@
-﻿@model WebPOS.Models.Business // or whatever model you use, change as needed
-@{
-    // You may need to use ViewData to get tables, orders, categories, products, etc.
-    var tables = ViewData["Tables"] as List<Table>;
-    var orders = ViewData["Orders"] as List<Order>;
-    var categories = ViewData["Categories"] as List<Category>;
-    var products = ViewData["Products"] as List<Product>;
-}
-
-<div class="row">
-    <div class="col-md-3">
-        <h5>Tables</h5>
-        <div>
-            @foreach (var table in tables)
+﻿@using WebPOS.Models  
+@using System.Collections.Generic  
+@model WebPOS.Models.POSFoodViewModel  
+@{  
+    ViewData["Title"] = "POS Food Interface";  
+}  
+<div class="row">  
+    <div class="col-md-3">  
+        <h5>Tables</h5>  
+        <div>  
+            @foreach (var table in Model.Tables)  
             {
                 <button class="btn btn-block mb-2 @(table.IsOccupied ? "btn-danger" : "btn-success")"
                         onclick="selectTable(@table.TableId)">
-                    Table @table.TableNumber
+                    @table.Name
                 </button>
-            }
-        </div>
-    </div>
-    <div class="col-md-6">
-        <h5>Order for Table <span id="selectedTable"></span></h5>
-        <!-- Show products, categories and add to order/cart here -->
-        <!-- ... -->
-        <div>
-            <select id="orderType" class="form-select mb-2">
-                <option value="dinein">Dine In</option>
-                <option value="delivery">Delivery</option>
-                <option value="pickup">Pickup</option>
-            </select>
-        </div>
-        <div id="orderItems">
-            <!-- List order items here -->
-        </div>
-        <button class="btn btn-primary" onclick="saveOrder()">Save Order</button>
-    </div>
-    <div class="col-md-3">
-        <h5>Kitchen Display</h5>
-        <div id="kitchenOrders">
-            @foreach (var order in orders)
-            {
-                <div class="card mb-2">
-                    <div class="card-header">
-                        Table @order.Table.TableNumber (@order.OrderType)
-                    </div>
-                    <div class="card-body">
-                        <!-- List products for kitchen here -->
-                        @foreach (var item in order.OrderItems)
-                        {
-                            <div>@item.Product.Name x @item.Quantity</div>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-</div>
+            }  
+        </div>  
+    </div>  
+    <div class="col-md-6">  
+        <h5>Order for Table <span id="selectedTable"></span></h5>  
+        <!-- Show products, categories and add to order/cart here -->  
+        <!-- ... -->  
+        <div>  
+            <select id="orderType" class="form-select mb-2">  
+                <option value="dinein">Dine In</option>  
+                <option value="delivery">Delivery</option>  
+                <option value="pickup">Pickup</option>  
+            </select>  
+        </div>  
+        <div id="orderItems">  
+            <!-- List order items here -->  
+        </div>  
+        <button class="btn btn-primary" onclick="saveOrder()">Save Order</button>  
+    </div>  
+    <div class="col-md-3">  
+        <h5>Kitchen Display</h5>  
+        <div id="kitchenOrders">  
+            @foreach (var order in Model.Orders)  
+            {  
+                <div class="card mb-2">  
+                    <div class="card-header">  
+                        Table @(order.Table?.Name ?? "Unknown") (@order.OrderType)  
+                    </div>  
+                    <div class="card-body">  
+                        <!-- List products for kitchen here -->  
+                        @foreach (var item in order.OrderItems)  
+                        {  
+                            <div>@item.Product.Name x @item.Quantity</div>  
+                        }  
+                    </div>  
+                </div>  
+            }  
+        </div>  
+    </div>  
+</div>  
 
-<script>
-    function selectTable(tableId) {
-        document.getElementById('selectedTable').innerText = tableId;
-        // Load order for this table using AJAX or update the page state
-    }
-    function saveOrder() {
-        // Collect order info, send to backend (AJAX or form post)
-    }
+<script>  
+    function selectTable(tableId) {  
+        document.getElementById('selectedTable').innerText = tableId;  
+        // Load order for this table using AJAX or update the page state  
+    }  
+    function saveOrder() {  
+        // Collect order info, send to backend (AJAX or form post)  
+    }  
 </script>
