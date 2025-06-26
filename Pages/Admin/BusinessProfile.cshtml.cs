@@ -33,9 +33,9 @@ namespace WebPOS.Pages.Admin
 
         public async Task<IActionResult> OnPostAsync()
         {
-            System.Diagnostics.Debug.WriteLine($"POSTED TemplateId: {BusinessInfo.TemplateId}");
-            Templates = await _context.Templates.ToListAsync();
-            TemplateSelectList = new SelectList(Templates, "TemplateId", "TemplateName");
+            //System.Diagnostics.Debug.WriteLine($"POSTED TemplateId: {BusinessInfo.TemplateId}");
+            //Templates = await _context.Templates.ToListAsync();
+            //TemplateSelectList = new SelectList(Templates, "TemplateId", "TemplateName");
             if (!ModelState.IsValid)
                 return Page();
 
@@ -50,13 +50,12 @@ namespace WebPOS.Pages.Admin
             //}
 
             // Always update the first (and only) business in your DB
-            var existing = await _context.Businesses.FirstOrDefaultAsync();
-
+            var existing = await _context.Businesses.FindAsync(BusinessInfo.BusinessId);
             if (existing != null)
             {
-                _context.Entry(existing).CurrentValues.SetValues(BusinessInfo);
+                existing.Name = BusinessInfo.Name;
+                existing.TemplateId = BusinessInfo.TemplateId;
                 await _context.SaveChangesAsync();
-                System.Diagnostics.Debug.WriteLine($"UPDATED (force) TemplateId: {existing.TemplateId}");
             }
             else
             {
