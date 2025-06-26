@@ -32,9 +32,10 @@ namespace WebPOS.Pages.Admin
             Sales = await salesQuery
                 .Include(s => s.Customer)
                 .Include(s => s.User)
+                .Include(s => s.Table)
+                .Include(s => s.Order)
                 .OrderByDescending(s => s.SaleDate)
                 .ToListAsync();
-
             TotalAmount = Sales.Sum(s => s.TotalAmount);
         }
     }

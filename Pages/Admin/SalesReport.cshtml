@@ -27,6 +27,8 @@
                 <tr>
                     <th>Date</th>
                     <th>Sale ID</th>
+                    <th>Order #</th>
+                    <th>Table</th>
                     <th>Seller</th>
                     <th>Customer</th>
                     <th>Total</th>
@@ -38,6 +40,8 @@
                     <tr>
                         <td>@sale.SaleDate.ToString("yyyy-MM-dd HH:mm")</td>
                         <td>@sale.SaleId</td>
+                        <td>@(sale.Order != null ? sale.Order.OrderNumber.ToString() : "-")</td>
+                        <td>@(sale.Table != null ? sale.Table.Name : "-")</td>
                         <td>@(sale.User != null ? sale.User.Username : sale.UserId.ToString())</td>
                         <td>@(sale.Customer != null ? sale.Customer.Name : "Default")</td>
                         <td>@sale.TotalAmount.ToString("0.00") DH</td>

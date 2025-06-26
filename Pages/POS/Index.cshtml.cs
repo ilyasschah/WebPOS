@@ -5,12 +5,17 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using WebPOS.Data;
 using WebPOS.Models;
+using System;
+using System.Linq;
+using System.IO;
 
 namespace WebPOS.Pages.POS
 {
-    public class IndexModel(AppDbContext ctx) : PageModel
+    public class IndexModel : PageModel
     {
-        private readonly AppDbContext _ctx = ctx;
+        private readonly AppDbContext _ctx;
+        public IndexModel(AppDbContext ctx) => _ctx = ctx;
+
         public Business? Business { get; set; }
         public string BusinessType { get; set; } = string.Empty;
         public List<Category> Categories { get; set; } = new List<Category>();
@@ -19,10 +24,11 @@ namespace WebPOS.Pages.POS
         public List<Table> Tables { get; set; }
         public List<Order> Orders { get; set; }
         public List<CartItem> Cart { get; set; } = new();
+
         public async Task OnGetAsync(int? categoryId = null)
         {
             int? businessId = HttpContext.Session.GetInt32("BusinessId");
-            
+
             if (businessId == null)
             {
                 BusinessType = string.Empty;
@@ -55,6 +61,7 @@ namespace WebPOS.Pages.POS
                 .ToListAsync();
             Cart = GetCart();
         }
+
         private const string CartSessionKey = "POS_Cart";
 
         private List<CartItem> GetCart()
@@ -70,6 +77,7 @@ namespace WebPOS.Pages.POS
             var cartJson = System.Text.Json.JsonSerializer.Serialize(cart);
             HttpContext.Session.SetString(CartSessionKey, cartJson);
         }
+
         public async Task<IActionResult> OnPostAddToCartAsync(int productId, int? categoryId = null)
         {
             int? businessId = HttpContext.Session.GetInt32("BusinessId");
@@ -103,6 +111,7 @@ namespace WebPOS.Pages.POS
                 return RedirectToPage(new { categoryId });
             return RedirectToPage();
         }
+
         public IActionResult OnPostIncreaseQuantity(int productId, int? categoryId = null)
         {
             var cart = GetCart();
@@ -146,6 +155,7 @@ namespace WebPOS.Pages.POS
                 return RedirectToPage(new { categoryId });
             return RedirectToPage();
         }
+
         public IActionResult OnPostClearCart(int? categoryId = null)
         {
             SaveCart(new List<CartItem>());
@@ -239,6 +249,76 @@ namespace WebPOS.Pages.POS
             if (categoryId != null)
                 return RedirectToPage(new { categoryId });
             return RedirectToPage();
+        }
+
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> OnPostCreateOrderAsync()
+        {
+            try
+            {
+                using var reader = new StreamReader(Request.Body);
+                var body = await reader.ReadToEndAsync();
+                var data = System.Text.Json.JsonSerializer.Deserialize<CreateOrderRequest>(body);
+
+                if (data == null || data.tableId == 0)
+                    return new JsonResult(new { success = false, error = "Invalid data" });
+
+                int? businessId = HttpContext.Session.GetInt32("BusinessId");
+                if (businessId == null)
+                    return new JsonResult(new { success = false, error = "No business" });
+
+                // Check if open order already exists for this table
+                var existingOrder = await _ctx.Orders
+                    .Where(o => o.TableId == data.tableId && o.Status == "open" && o.BusinessId == businessId)
+                    .FirstOrDefaultAsync();
+
+                if (existingOrder != null)
+                {
+                    return new JsonResult(new { success = true, orderId = existingOrder.OrderId });
+                }
+
+                // Create new order
+                var order = new Order
+                {
+                    TableId = data.tableId,
+                    Status = "open",
+                    BusinessId = businessId.Value,
+                    CreatedAt = DateTime.UtcNow,
+                    OrderNumber = await GetNextOrderNumberAsync()
+                };
+
+                _ctx.Orders.Add(order);
+
+                // Mark the table as occupied
+                var table = await _ctx.Tables.FindAsync(data.tableId);
+                if (table != null)
+                    table.Status = "occupied";
+
+                await _ctx.SaveChangesAsync();
+
+                return new JsonResult(new { success = true, orderId = order.OrderId });
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult(new { success = false, error = ex.Message });
+            }
+        }
+
+        public class CreateOrderRequest
+        {
+            public int tableId { get; set; }
+        }
+
+        // Helper to generate next order number (daily)
+        private async Task<int> GetNextOrderNumberAsync()
+        {
+            var today = DateTime.UtcNow.Date;
+            int maxOrderNumberToday = await _ctx.Orders
+                .Where(o => o.CreatedAt.Date == today)
+                .Select(o => o.OrderNumber)
+                .DefaultIfEmpty(0)
+                .MaxAsync();
+            return maxOrderNumberToday + 1;
         }
     }
 }

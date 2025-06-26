@@ -33,22 +33,8 @@ namespace WebPOS.Pages.Admin
 
         public async Task<IActionResult> OnPostAsync()
         {
-            //System.Diagnostics.Debug.WriteLine($"POSTED TemplateId: {BusinessInfo.TemplateId}");
-            //Templates = await _context.Templates.ToListAsync();
-            //TemplateSelectList = new SelectList(Templates, "TemplateId", "TemplateName");
             if (!ModelState.IsValid)
                 return Page();
-
-            // Check for duplicate name
-            //var duplicate = await _context.Businesses
-            //    .AnyAsync(b => b.Name == BusinessInfo.Name && b.BusinessId != BusinessInfo.BusinessId);
-            //
-            //if (duplicate)
-            //{
-            //    ModelState.AddModelError("BusinessInfo.Name", "A business with this name already exists.");
-            //    return Page();
-            //}
-
             // Always update the first (and only) business in your DB
             var existing = await _context.Businesses.FindAsync(BusinessInfo.BusinessId);
             if (existing != null)

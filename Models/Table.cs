@@ -17,6 +17,20 @@ namespace WebPOS.Models
 
         [Column("businessid")]
         public int BusinessId { get; set; }
+        [Column("number")]
+        public int Number { get; set; }
+
+        [Column("color")]
+        public string Color { get; set; }
+
+        [Column("shape")]
+        public string Shape { get; set; }
+
+        [Column("x")]
+        public int X { get; set; } // position X
+
+        [Column("y")]
+        public int Y { get; set; } // position Y
 
         public Business Business { get; set; } = null!;
         public ICollection<Order> Orders { get; set; } = new List<Order>();

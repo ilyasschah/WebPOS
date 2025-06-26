@@ -8,16 +8,16 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WebPOS.Services;  // <-- Add this for PermissionHelper
+using WebPOS.Services;  
 
 namespace WebPOS.Pages.Admin
 {
     public class InventoryModel : PageModel
     {
         private readonly AppDbContext _ctx;
-        private readonly PermissionHelper _permHelper; // <-- Add this
+        private readonly PermissionHelper _permHelper; 
 
-        public InventoryModel(AppDbContext ctx, PermissionHelper permHelper) // <-- Add permHelper param
+        public InventoryModel(AppDbContext ctx, PermissionHelper permHelper) 
         {
             _ctx = ctx;
             _permHelper = permHelper;
@@ -33,7 +33,7 @@ namespace WebPOS.Pages.Admin
 
         public List<Category> Categories { get; set; } = new();
 
-        public bool CanUpdateStock { get; set; } // <-- Expose permission
+        public bool CanUpdateStock { get; set; } 
 
         public async Task OnGetAsync()
         {

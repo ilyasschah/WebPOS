@@ -1,66 +1,191 @@
-﻿@using WebPOS.Models  
-@using System.Collections.Generic  
-@model WebPOS.Models.POSFoodViewModel  
-@{  
-    ViewData["Title"] = "POS Food Interface";  
-}  
-<div class="row">  
-    <div class="col-md-3">  
-        <h5>Tables</h5>  
-        <div>  
-            @foreach (var table in Model.Tables)  
-            {
-                <button class="btn btn-block mb-2 @(table.IsOccupied ? "btn-danger" : "btn-success")"
-                        onclick="selectTable(@table.TableId)">
-                    @table.Name
-                </button>
-            }  
-        </div>  
-    </div>  
-    <div class="col-md-6">  
-        <h5>Order for Table <span id="selectedTable"></span></h5>  
-        <!-- Show products, categories and add to order/cart here -->  
-        <!-- ... -->  
-        <div>  
-            <select id="orderType" class="form-select mb-2">  
-                <option value="dinein">Dine In</option>  
-                <option value="delivery">Delivery</option>  
-                <option value="pickup">Pickup</option>  
-            </select>  
-        </div>  
-        <div id="orderItems">  
-            <!-- List order items here -->  
-        </div>  
-        <button class="btn btn-primary" onclick="saveOrder()">Save Order</button>  
-    </div>  
-    <div class="col-md-3">  
-        <h5>Kitchen Display</h5>  
-        <div id="kitchenOrders">  
-            @foreach (var order in Model.Orders)  
-            {  
-                <div class="card mb-2">  
-                    <div class="card-header">  
-                        Table @(order.Table?.Name ?? "Unknown") (@order.OrderType)  
-                    </div>  
-                    <div class="card-body">  
-                        <!-- List products for kitchen here -->  
-                        @foreach (var item in order.OrderItems)  
-                        {  
-                            <div>@item.Product.Name x @item.Quantity</div>  
-                        }  
-                    </div>  
-                </div>  
-            }  
-        </div>  
-    </div>  
-</div>  
+﻿@using WebPOS.Models
+@using System.Text.Json
+@model POSFoodViewModel
+@{
+    ViewData["Title"] = "POS Food Interface";
+}
+@{
+    // Helper: Project tables to simple objects (no cycles)
+    var simpleTables = Model.Tables.Select(t => new
+    {
+        t.TableId,
+        t.Name,
+        t.Status,
+        t.Number,
+        t.Color,
+        t.Shape,
+        t.X,
+        t.Y
+    }).ToList();
 
-<script>  
-    function selectTable(tableId) {  
-        document.getElementById('selectedTable').innerText = tableId;  
-        // Load order for this table using AJAX or update the page state  
-    }  
-    function saveOrder() {  
-        // Collect order info, send to backend (AJAX or form post)  
-    }  
+    // Helper: Project orders to simple objects
+    var simpleOrders = Model.Orders.Select(o => new
+    {
+        o.OrderId,
+        o.TableId,
+        o.Status
+    }).ToList();
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+<style>
+    .pos-table {
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+        user-select: none;
+        cursor: pointer;
+        box-shadow: 0 2px 12px #0001;
+        border: 3px solid #ccc;
+        transition: box-shadow .18s, border-color .18s;
+        color: #fff;
+    }
+
+        .pos-table.available {
+            border-color: #27c26c !important;
+        }
+
+        .pos-table.reserved {
+            border-color: #ffb700 !important;
+        }
+
+        .pos-table.occupied {
+            border-color: #d71f1f !important;
+        }
+
+        .pos-table.selected {
+            box-shadow: 0 0 14px #fff4;
+        }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Tables</h4>
+    <a href="/Admin/TablesSettings" class="btn btn-light btn-sm" title="Edit Tables">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+            <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zm5.668 3.92c.06-.5.332-.958.764-1.274l.01-.007a1.007 1.007 0 0 0-.063-1.636l-2.338-1.35a1 1 0 0 0-1.122.072l-.007.005a1.007 1.007 0 0 0-.335 1.13c.06.23.093.474.093.722s-.033.492-.093.723a1.007 1.007 0 0 0 .335 1.13l.007.005a1 1 0 0 0 1.122.072l2.338-1.35a1.007 1.007 0 0 0 .063-1.636l-.01-.007a1.01 1.01 0 0 0-.764-1.273z" />
+            <path d="M2.344 9.674a1.007 1.007 0 0 0 .063 1.636l2.338 1.35a1 1 0 0 0 1.122-.072l.007-.005a1.007 1.007 0 0 0 .335-1.13A3.232 3.232 0 0 1 7 8.001c0-.249.033-.493.093-.723a1.007 1.007 0 0 0-.335-1.13l-.007-.005a1 1 0 0 0-1.122-.072l-2.338 1.35a1.007 1.007 0 0 0-.063-1.636z" />
+        </svg>
+        <span class="ms-1">Settings</span>
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-9 position-relative" style="min-height: 600px; border: 1px solid #ececec; border-radius: 18px; background: #f7f7fa;">
+        @foreach (var table in Model.Tables)
+        {
+            var borderClass = table.Status == "occupied"
+            ? "occupied"
+            : table.Status == "reserved"
+            ? "reserved"
+            : "available";
+            var tooltip = $"Table: {table.Name} (#{table.Number})&#10;Status: {table.Status}&#10;Pos: ({table.X},{table.Y})";
+
+            <div class="pos-table @borderClass"
+                 id="table-@table.TableId"
+                 onclick="selectTable(@table.TableId)"
+                 title="@tooltip"
+                 style="
+                            left: @(table.X)px;
+                            top: @(table.Y)px;
+                            background: @table.Color;
+                            border-radius: @(table.Shape == "circle" ? "50%" : "18px");
+                        ">
+                <span>@table.Name</span>
+                <span style="font-size: 13px; font-weight: 400; color: #f8f8f8;">
+                    @(table.Status ?? "unknown")
+                </span>
+            </div>
+        }
+    </div>
+    <div class="col-md-3">
+        <div id="tableOptionsPanel" style="display:none;">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 id="selectedTableName"></h5>
+                    <div class="mb-2">
+                        <span class="badge bg-secondary" id="selectedTableStatus"></span>
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-outline-success mb-1 w-100" onclick="setTableStatus('available')">Available</button>
+                        <button class="btn btn-outline-warning mb-1 w-100" onclick="setTableStatus('reserved')">Reserved</button>
+                        <button class="btn btn-outline-danger mb-3 w-100" onclick="setTableStatus('occupied')">Occupied</button>
+                    </div>
+                    <div id="orderActions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedTableId = null;
+    let tableData = @Html.Raw(JsonSerializer.Serialize(simpleTables));
+    let ordersData = @Html.Raw(JsonSerializer.Serialize(simpleOrders));
+
+    function selectTable(tableId) {
+        selectedTableId = tableId;
+        // Highlight selected
+        document.querySelectorAll('.pos-table').forEach(e => e.classList.remove("selected"));
+        let tableDiv = document.getElementById('table-' + tableId);
+        if (tableDiv) tableDiv.classList.add("selected");
+
+        // Find table
+        let table = tableData.find(t => t.TableId === tableId);
+        if (!table) return;
+
+        // Fill panel
+        document.getElementById('selectedTableName').innerText = `${table.Name} (#${table.Number})`;
+        document.getElementById('selectedTableStatus').innerText = table.Status || 'unknown';
+
+        // Show status actions
+        document.getElementById('tableOptionsPanel').style.display = "block";
+
+        // Show order actions
+        let actionsDiv = document.getElementById('orderActions');
+        actionsDiv.innerHTML = "";
+
+        let openOrder = ordersData.find(o => o.TableId === tableId && o.Status === "open");
+        // Business logic:
+        // - Show "Create Order" for available/reserved
+        // - Show "Edit the Order" for occupied + open order exists
+        if (table.Status === "available" || table.Status === "reserved") {
+            actionsDiv.innerHTML = `<button class="btn btn-primary w-100" onclick="createOrder()">Create Order</button>`;
+        } else if (table.Status === "occupied" && openOrder) {
+            actionsDiv.innerHTML = `<a class="btn btn-primary w-100" href="/POS/Index?orderId=${openOrder.OrderId}">Edit the Order</a>`;
+        } else if (table.Status === "occupied") {
+            actionsDiv.innerHTML = `<button class="btn btn-primary w-100" onclick="createOrder()">Create Order</button>`;
+        }
+    }
+
+    function setTableStatus(status) {
+        if (!selectedTableId) return;
+        fetch('?handler=UpdateTableStatus', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tableId: selectedTableId, status: status })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) location.reload();
+        });
+    }
+
+    function createOrder() {
+        if (!selectedTableId) return;
+        fetch('/POS/Food?handler=CreateOrder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tableId: selectedTableId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.orderId)
+                window.location.href = `/POS/Index?orderId=${data.orderId}`;
+        });
+    }
 </script>

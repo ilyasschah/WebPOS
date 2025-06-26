@@ -29,11 +29,12 @@ namespace WebPOS.Models
         [Column("payment_type")]
         public int PaymentType { get; set; }
 
-        [Column("orderid")]
+        [Column("order_id")]
         public int? OrderId { get; set; }
+
         public Order Order { get; set; }
 
-        [Column("tableid")]
+        [Column("table_id")]
         public int? TableId { get; set; }
         public Table Table { get; set; }
     }
